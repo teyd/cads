@@ -81,4 +81,4 @@ The folder name says what the part is. Dimensions stay in the script, so a size 
 
 ## License
 
-This repository does not have a license yet. Until you add one, others cannot tell whether they may reuse the models.
+[MIT](LICENSE). It covers the scripts and the models.
