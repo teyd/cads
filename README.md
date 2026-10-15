@@ -4,6 +4,14 @@ Parametric CAD parts as [build123d](https://github.com/gumyr/build123d) scripts.
 
 ## How to
 
+Paste this to your AI coding agent:
+
+```text
+Set up https://github.com/teyd/cads for me. Install mise (https://mise.jdx.dev/, a tool version manager) if it is missing and make sure it is on my PATH, clone the repo, run `mise install` inside it, and follow AGENTS.md from then on. When setup is done, ask me which part I want to build.
+```
+
+Or do it by hand:
+
 ```sh
 brew install mise # add mise to path
 git clone https://github.com/teyd/cads.git
