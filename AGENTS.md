@@ -19,6 +19,8 @@ uv run python parts/<name>/<name>.py
 
 If the import fails, run `uv sync`, then export again.
 
+   Then refresh the README parts table: `uv run python scripts/update_readme.py`. CI does the same on push.
+
 4. A valid export is a new non-empty file that starts with `ISO-10303-21`. On any other result, fix the source and export again.
 5. Report both paths, the named dimensions, and every assumption, in the user's language.
 
@@ -35,6 +37,7 @@ Done when that valid export sits beside the source and the user has those facts.
 - `export_step` returns true.
 - One fused solid. `Compound` only for an assembly the user asked for.
 - Model the features the user named.
+- The part must be 3D-printable (FDM by default). Pick a print orientation with the largest flat face on the bed and name it in the docstring. Avoid overhangs steeper than 45 degrees, bridges over 5 mm, walls under 1.2 mm, and unsupported features. Mating parts get 0.3 mm clearance per side. Say in the report which print orientation you assumed.
 - The script exports and exits.
 - The docstring keeps the original request in the user's words, plus each assumption.
 
