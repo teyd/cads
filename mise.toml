@@ -1,0 +1,16 @@
+# build123d 0.13 supports CPython 3.11–3.14. 3.13 keeps the OCP wheels reliable.
+[tools]
+python = "3.13"
+uv = "latest"
+
+[env]
+UV_PYTHON = { value = "{{ tools.python.path }}", tools = true }
+# Project lives on another volume than the uv cache, so hardlinks fail.
+UV_LINK_MODE = "copy"
+
+[settings]
+python.uv_venv_auto = "create|source"
+
+[tasks.sync]
+description = "Install Python dependencies into .venv"
+run = "uv sync"
