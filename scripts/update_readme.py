@@ -8,7 +8,6 @@ START and END markers is replaced.
 import ast
 import os
 from pathlib import Path
-from urllib.parse import quote
 
 ROOT = Path(__file__).resolve().parent.parent
 README = ROOT / "README.md"
@@ -19,6 +18,7 @@ BRANCH = "main"
 RAW_BASE = f"https://raw.githubusercontent.com/{REPO}/{BRANCH}"
 VIEWER = "https://3dviewer.net/#model="
 
+# The viewer reads the raw URL from the hash as is. Percent-encoding it breaks loading.
 START = "<!-- parts:start -->"
 END = "<!-- parts:end -->"
 
@@ -40,7 +40,7 @@ def build_table() -> str:
         rows.append(
             f"| [{name}](parts/{name}/) | {describe(script)} "
             f"| [py](parts/{name}/{name}.py), [step](parts/{name}/{name}.step) "
-            f"| [View]({VIEWER}{quote(raw, safe='')}) |"
+            f"| [View]({VIEWER}{raw}) |"
         )
     return "\n".join(rows)
 
