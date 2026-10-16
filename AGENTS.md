@@ -29,7 +29,16 @@ If the import fails, run `uv sync`, then export again.
    - `valid` is True.
    - `size` matches the named dimensions. A wrong size means a centered primitive, a wrong sign, or an unassigned result.
    - `volume` is near a rough hand estimate. A volume that did not change means a cutter missed the part or an operation was never assigned.
-6. Report both paths, the named dimensions, the checked size and volume, and every assumption, in the user's language.
+6. Verify the export in the MCP when the part has more than one boolean, fillet or pattern (a bare box, plate or ring needs only step 5). Use one batched `execute` call, never one call per check, and keep the output compact:
+   - Import the exported STEP with `import_step`, not a copy of the code.
+   - Print `solids`, `valid`, the bounding box, the volume and the face count.
+   - Scan for print problems: planar faces with `normal_at().Z < -0.99` above the bed are overhangs. Their span must stay within the 5 mm bridge limit. The bed contact must be one large face.
+   - For a mating or holding part, intersect it with a stand-in of the other part. The overlap volume must be 0.
+   - Render once with `render_view` from `iso`. Trust the numbers over a clipped section render.
+   - Save that render as the preview: `render_view(objects=..., direction="iso", save_to="parts/<name>/<name>.png")`, then rerun `update_readme.py`. Render again after every change to the part. A bare box, plate or ring gets its preview the same way, even without the checks above.
+   - Skip `workflow_hints`, `health_check` and `version` unless a call fails.
+   Fix the source and export again on any failure.
+7. Report both paths, the named dimensions, the checked size and volume, and every assumption, in the user's language.
 
 Done when that valid export sits beside the source, the check holds, and the user has those facts.
 
@@ -44,7 +53,7 @@ Done when that valid export sits beside the source, the check holds, and the use
 - `export_step` returns true.
 - One fused solid. `Compound` only for an assembly the user asked for.
 - Model the features the user named.
-- The part must be 3D-printable (FDM by default). Pick a print orientation with the largest flat face on the bed and name it in a one-line comment under the docstring. Avoid overhangs steeper than 45 degrees, bridges over 5 mm, walls under 1.2 mm, and unsupported features. Mating parts get 0.3 mm clearance per side. Say in the report which print orientation you assumed.
+- The part must be 3D-printable (FDM by default). Pick a print orientation with the largest flat face on the bed and name it in a one-line comment under the docstring. Avoid overhangs steeper than 45 degrees, bridges over 5 mm (a wide window in a vertical wall needs a pointed or 45 degree chamfered head), walls under 1.2 mm, and unsupported features. Mating parts get 0.3 mm clearance per side. Say in the report which print orientation you assumed.
 - The script exports and exits.
 - The docstring is one line that says what the part is. The README table shows it.
 - No request text, units or assumption lists in the file. Assumptions go in the report. A short comment is allowed on a value that is not obvious, such as a spec tolerance.

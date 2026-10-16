@@ -1,7 +1,7 @@
 """Rewrite the parts table in README.md from the folders in parts/.
 
-Each row links the part folder, the STEP file, and an Online 3D Viewer link that
-loads the STEP file from raw.githubusercontent.com. Only the text between the
+Each row shows the preview PNG when one exists, and links the part folder, the STEP
+file, and an Online 3D Viewer link that loads the STEP file from raw.githubusercontent.com. Only the text between the
 START and END markers is replaced.
 """
 
@@ -29,7 +29,10 @@ def describe(script: Path) -> str:
 
 
 def build_table() -> str:
-    rows = ["| Part | Description | Files | 3D view |", "| --- | --- | --- | --- |"]
+    rows = [
+        "| Preview | Part | Description | Files | 3D view |",
+        "| --- | --- | --- | --- | --- |",
+    ]
     for folder in sorted(p for p in PARTS.iterdir() if p.is_dir()):
         name = folder.name
         script = folder / f"{name}.py"
@@ -37,8 +40,10 @@ def build_table() -> str:
         if not (script.exists() and step.exists()):
             continue
         raw = f"{RAW_BASE}/parts/{name}/{name}.step"
+        png = folder / f"{name}.png"
+        preview = f'<img src="parts/{name}/{name}.png" width="160">' if png.exists() else ""
         rows.append(
-            f"| [{name}](parts/{name}/) | {describe(script)} "
+            f"| {preview} | [{name}](parts/{name}/) | {describe(script)} "
             f"| [py](parts/{name}/{name}.py), [step](parts/{name}/{name}.step) "
             f"| [View]({VIEWER}{raw}) |"
         )

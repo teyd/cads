@@ -7,6 +7,7 @@ from build123d import (
     Align,
     Axis,
     Box,
+    Polygon,
     Pos,
     Rot,
     RectangleRounded,
@@ -43,12 +44,25 @@ SLOT = BOARD_T + SLOT_PLAY
 FRONT_Y = SLOT + LEG_T
 RIB = 5.0
 CORNER = 3.0
+MAX_BRIDGE = 5.0
 EPS = 0.01
 
 MIN_Y = (Align.CENTER, Align.MIN, Align.MIN)
 
 
-def window_set(width, height, cols, rows, rib, depth):
+def window_shape(cw, ch, peaked):
+    if not peaked:
+        return RectangleRounded(cw, ch, CORNER)
+    # Sketch -v becomes print-up after the final flip, so the 45 degree chamfer goes on the low-v corners.
+    c = min((cw - MAX_BRIDGE) / 2, ch / 2)
+    x, y = cw / 2, ch / 2
+    return Polygon(
+        (-x + c, -y), (x - c, -y), (x, -y + c), (x, y), (-x, y), (-x, -y + c),
+        align=None,
+    )
+
+
+def window_set(width, height, cols, rows, rib, depth, peaked=True):
     cw = (width - (cols + 1) * rib) / cols
     ch = (height - (rows + 1) * rib) / rows
     cutters = None
@@ -57,7 +71,7 @@ def window_set(width, height, cols, rows, rib, depth):
             u = -width / 2 + rib + cw / 2 + i * (cw + rib)
             v = -height / 2 + rib + ch / 2 + j * (ch + rib)
             c = Pos(u, v, 0) * extrude(
-                RectangleRounded(cw, ch, CORNER), amount=depth / 2, both=True
+                window_shape(cw, ch, peaked), amount=depth / 2, both=True
             )
             cutters = c if cutters is None else cutters + c
     return cutters
@@ -131,7 +145,7 @@ def make_part():
         * window_set(win_w, 33.0, 2, 1, 6.0, LEG_T + 2)
     )
     plate_windows = Pos(0, SLOT / 2, -PLATE_T / 2) * window_set(
-        win_w, SLOT - 12.0, 2, 1, 6.0, PLATE_T + 2
+        win_w, SLOT - 12.0, 2, 1, 6.0, PLATE_T + 2, peaked=False
     )
 
     part = part - front_windows - side_windows - back_windows - plate_windows
