@@ -17,7 +17,7 @@ brew install mise # add mise to path
 git clone https://github.com/teyd/cads.git
 cd cads
 mise install
-opencode # or pi, claude, etc.
+opencode # v2
 ```
 
 Then describe the part you want. The agent follows `AGENTS.md`.
@@ -29,6 +29,7 @@ When it is done, open `parts/<name>/<name>.step` in a slicer such as [OrcaSlicer
 <!-- parts:start -->
 | Part | Description | Files | 3D view |
 | --- | --- | --- | --- |
+| [charger-bed-hook](parts/charger-bed-hook/) | Bed-frame hook with an open cage for a Ugreen 90747 desktop charger | [py](parts/charger-bed-hook/charger-bed-hook.py), [step](parts/charger-bed-hook/charger-bed-hook.step) | [View](https://3dviewer.net/#model=https://raw.githubusercontent.com/teyd/cads/main/parts/charger-bed-hook/charger-bed-hook.step) |
 | [flat-ring](parts/flat-ring/) | Flat annular ring | [py](parts/flat-ring/flat-ring.py), [step](parts/flat-ring/flat-ring.step) | [View](https://3dviewer.net/#model=https://raw.githubusercontent.com/teyd/cads/main/parts/flat-ring/flat-ring.step) |
 | [nvme-stack-case](parts/nvme-stack-case/) | Stackable case for ten M.2 2280 NVMe drives | [py](parts/nvme-stack-case/nvme-stack-case.py), [step](parts/nvme-stack-case/nvme-stack-case.step) | [View](https://3dviewer.net/#model=https://raw.githubusercontent.com/teyd/cads/main/parts/nvme-stack-case/nvme-stack-case.step) |
 | [sodimm-stack-case](parts/sodimm-stack-case/) | Stackable case for ten SO-DIMM RAM modules | [py](parts/sodimm-stack-case/sodimm-stack-case.py), [step](parts/sodimm-stack-case/sodimm-stack-case.step) | [View](https://3dviewer.net/#model=https://raw.githubusercontent.com/teyd/cads/main/parts/sodimm-stack-case/sodimm-stack-case.step) |

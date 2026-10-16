@@ -1,0 +1,30 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "lockFileMaintenance": {
+    "enabled": true
+  },
+  "packageRules": [
+    {
+      "description": "Hold back fresh PyPI releases briefly - build123d-mcp ships several releases per week",
+      "matchDatasources": ["pypi"],
+      "minimumReleaseAge": "3 days"
+    },
+    {
+      "description": "build123d and the MCP server drive the same geometry, so review them together",
+      "matchManagers": ["pep621", "custom.regex"],
+      "groupName": "build123d"
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "The pinned build123d-mcp version in opencode.json. Renovate has no built-in manager for OpenCode config files, so the version is matched directly.",
+      "managerFilePatterns": ["/^opencode\\.json$/"],
+      "matchStrings": ["\"build123d-mcp@(?<currentValue>[0-9][^\"]*)\""],
+      "depNameTemplate": "build123d-mcp",
+      "datasourceTemplate": "pypi",
+      "versioningTemplate": "pep440"
+    }
+  ]
+}

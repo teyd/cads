@@ -2,6 +2,8 @@
 
 Parametric parts are modeled with [build123d](https://github.com/gumyr/build123d). The Python script is the source. The STEP file is the export.
 
+The script is the deliverable. The build123d MCP server is a workbench: use it to build, measure and render geometry, then write the result into `parts/<name>/<name>.py`. The script must run on its own and never depend on a live MCP session.
+
 Reply in the user's language. A German request gets a German answer.
 
 ## Make a part
@@ -92,15 +94,15 @@ if __name__ == "__main__":
 
 ## Geometry
 
-Look up an uncertain call in the [build123d docs](https://build123d.readthedocs.io/en/latest/) or the [cheat sheet](https://build123d.readthedocs.io/en/latest/cheat_sheet.html).
+Look up an uncertain call in the MCP resources `build123d://quickref` and `build123d://selectors`, which are tested against the installed version. Without the MCP, use the [build123d docs](https://build123d.readthedocs.io/en/latest/) or the [cheat sheet](https://build123d.readthedocs.io/en/latest/cheat_sheet.html).
 
-`Box`, `Cylinder`, and `Cone` are centered. A part on the XY plane uses `align=(Align.CENTER, Align.CENTER, Align.MIN)`. Combine shapes with `+`, `-`, and `&`. Place one with `Pos(x, y, z) * shape`. Rotate with `Rot(x, y, z) * shape`.
+Place a shape with `Pos(x, y, z) * shape` and rotate it with `Rot(x, y, z) * shape`.
 
 Assign the result of an operation: `part = fillet(part.edges(), radius)`. A builder script stays in builder mode, and its solid is the context's `.part`.
 
 Build a profile as a 2D sketch with rounded corners (`RectangleRounded`), then extrude it. Fillet and chamfer last.
 
-Pick one face before working on it: `part.faces().sort_by(Axis.Z)[-1]`. A pick by extremum moves when a taller feature is added, so finish a feature before fusing it, keep a reference to geometry you made, or filter by property (`filter_by`, radius, axis). Along a curve, `@` is position and `%` is tangent. `extrude`, `revolve`, `loft`, and `sweep` make the non-box solids. An existing STEP file comes in through `import_step`.
+Pick one face before working on it, and have the MCP highlight that face or edge before you commit a fillet or a cut. A pick by extremum moves when a taller feature is added, so finish a feature before fusing it, keep a reference to geometry you made, or filter by property (radius, axis). An existing STEP file comes in through `import_step`.
 
 A hole cutter starts 0.5 mm before the face and is 1 mm longer than the stock.
 
