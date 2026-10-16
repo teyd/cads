@@ -22,9 +22,14 @@ If the import fails, run `uv sync`, then export again.
    Then refresh the README parts table: `uv run python update_readme.py`. CI does the same on push.
 
 4. A valid export is a new non-empty file that starts with `ISO-10303-21`. On any other result, fix the source and export again.
-5. Report both paths, the named dimensions, and every assumption, in the user's language.
+5. Check the geometry from the line the script prints. A file that exports can still be the wrong part. Fix the source and export again unless all four hold:
+   - `solids` is 1. Pieces that only touch stay separate; overlap them by 0.01 mm.
+   - `valid` is True.
+   - `size` matches the named dimensions. A wrong size means a centered primitive, a wrong sign, or an unassigned result.
+   - `volume` is near a rough hand estimate. A volume that did not change means a cutter missed the part or an operation was never assigned.
+6. Report both paths, the named dimensions, the checked size and volume, and every assumption, in the user's language.
 
-Done when that valid export sits beside the source and the user has those facts.
+Done when that valid export sits beside the source, the check holds, and the user has those facts.
 
 ## Script contract
 
@@ -70,9 +75,15 @@ def make_part():
 
 
 def main() -> None:
-    if not export_step(make_part(), STEP_PATH):
+    part = make_part()
+    if not export_step(part, STEP_PATH):
         raise SystemExit(f"STEP export failed: {STEP_PATH}")
-    print(f"wrote {STEP_PATH}")
+    size = part.bounding_box().size
+    print(
+        f"wrote {STEP_PATH}\n"
+        f"size {size.X:.1f} x {size.Y:.1f} x {size.Z:.1f}, "
+        f"volume {part.volume:.0f}, solids {len(part.solids())}, valid {part.is_valid}"
+    )
 
 
 if __name__ == "__main__":
@@ -87,7 +98,9 @@ Look up an uncertain call in the [build123d docs](https://build123d.readthedocs.
 
 Assign the result of an operation: `part = fillet(part.edges(), radius)`. A builder script stays in builder mode, and its solid is the context's `.part`.
 
-Pick one face before working on it: `part.faces().sort_by(Axis.Z)[-1]`. Along a curve, `@` is position and `%` is tangent. `extrude`, `revolve`, `loft`, and `sweep` make the non-box solids. An existing STEP file comes in through `import_step`.
+Build a profile as a 2D sketch with rounded corners (`RectangleRounded`), then extrude it. Fillet and chamfer last.
+
+Pick one face before working on it: `part.faces().sort_by(Axis.Z)[-1]`. A pick by extremum moves when a taller feature is added, so finish a feature before fusing it, keep a reference to geometry you made, or filter by property (`filter_by`, radius, axis). Along a curve, `@` is position and `%` is tangent. `extrude`, `revolve`, `loft`, and `sweep` make the non-box solids. An existing STEP file comes in through `import_step`.
 
 A hole cutter starts 0.5 mm before the face and is 1 mm longer than the stock.
 
