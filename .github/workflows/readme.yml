@@ -5,7 +5,7 @@ on:
     branches: [main]
     paths:
       - "parts/**"
-      - "scripts/update_readme.py"
+      - "update_readme.py"
 
 permissions:
   contents: write
@@ -18,7 +18,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
-      - run: python scripts/update_readme.py
+      - run: python update_readme.py
       - name: Commit README
         run: |
           if git diff --quiet README.md; then

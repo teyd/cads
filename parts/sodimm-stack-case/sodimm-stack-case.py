@@ -1,20 +1,6 @@
-"""Stackable U-channel case for ten SO-DIMM RAM modules.
+"""Stackable case for ten SO-DIMM RAM modules."""
 
-Request: now id like to build the same but for RAM SODIMM.
-(same design as nvme-stack-case: U channel, floor rails up to 50% of module height,
-all walls same height, stackable by default)
-Units: millimeters.
-Assumptions:
-- DDR4 and DDR5 SO-DIMM are 67.6 x 30.0 mm, +/-0.15 mm, up to about 3.8 mm thick with chips.
-- Inner length = 67.6 + 0.15 tolerance + 0.45 clearance = 68.2 mm.
-- Inner height above the floor = 30.0 + 0.15 + 1.05 clearance = 31.2 mm.
-- Slot width 4.6 mm (3.8 mm max thickness plus 0.8 mm clearance).
-- Modules stand on their 67.6 mm edge in 10 slots between floor rails; rails are 50% of module height (15 mm).
-- Drop-in from the top; unstack to reach a module.
-- Stacking: ridge ring on the wall tops fits a groove ring under the floor above (0.3 mm per side).
-- Print orientation: floor on the bed, open side up. No supports; the only bridge is the
-  1.8 mm groove roof under the floor.
-"""
+# Print floor-down, open side up, no supports.
 
 from pathlib import Path
 
@@ -26,7 +12,7 @@ STEP_PATH = HERE / f"{NAME}.step"
 
 MODULE_LENGTH = 67.6
 MODULE_HEIGHT = 30.0
-MODULE_TOLERANCE = 0.15
+MODULE_TOLERANCE = 0.15  # JEDEC: 67.6 x 30 mm, +/-0.15
 SLOT_COUNT = 10
 SLOT_WIDTH = 4.6
 LENGTH_CLEARANCE = 0.45

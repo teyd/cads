@@ -1,24 +1,6 @@
-"""Stackable U-channel case for ten M.2 2280 NVMe drives.
+"""Stackable case for ten M.2 2280 NVMe drives."""
 
-Request: looks better make all sides same height. the inner height should be a little bit higher than m2 nvme's are
-the inner length should fit m2 nvme's. research and optimize this
-(earlier: I want to build a M2 2280 case that holds up to 10 nvmes, it should be stackable by default;
-it shouldnt be a "block", rather be a U shape and in the bottom you have railings that go up to like 50% of the height)
-Units: millimeters.
-Research: M.2 spec and vendor datasheets give a 2280 PCB of 80.00 +/-0.15 mm by 22.00 +/-0.15 mm,
-0.8 mm thick, typically 3.5 mm total with chips. Worst case is therefore 80.15 x 22.15 mm.
-Assumptions:
-- Inner length = 80.15 worst case + 0.45 mm FDM/slide clearance = 80.6 mm.
-- Inner height above the floor = 22.15 + 1.05 clearance = 23.2 mm.
-- Slot width 4.0 mm (fits typical 2.3-3.8 mm drives; very tall heatsinks will not fit).
-- Drives stand on their 80 mm edge in 10 slots between floor rails; rails are 50% of drive height (11 mm).
-- All four walls (two sides, front, back) have the same height. Drives drop in from the top.
-- Stacking: a ridge ring on the wall tops fits a groove ring under the floor above
-  (0.3 mm clearance per side). The floor above closes the case below, so unstack to reach a drive.
-- Print orientation: floor on the bed, open side up. No supports needed; the only bridge is the
-  1.6 mm groove roof under the floor.
-- Printed as one piece, no screws.
-"""
+# Print floor-down, open side up, no supports.
 
 from pathlib import Path
 
@@ -30,7 +12,7 @@ STEP_PATH = HERE / f"{NAME}.step"
 
 DRIVE_LENGTH = 80.0
 DRIVE_WIDTH = 22.0
-DRIVE_TOLERANCE = 0.15
+DRIVE_TOLERANCE = 0.15  # M.2 spec: 80 x 22 mm, +/-0.15
 SLOT_COUNT = 10
 SLOT_WIDTH = 4.0
 LENGTH_CLEARANCE = 0.45

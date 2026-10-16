@@ -1,9 +1,4 @@
-"""Flat annular ring.
-
-Request: a ring, 1 cm thick, 15 cm diameter, with a 6 cm hole in the middle.
-Units: millimeters.
-Assumptions: a flat annulus, not a torus. It sits on the XY plane.
-"""
+"""Flat annular ring."""
 
 from pathlib import Path
 

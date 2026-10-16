@@ -11,6 +11,10 @@ UV_LINK_MODE = "copy"
 [settings]
 python.uv_venv_auto = "create|source"
 
+[tasks.readme]
+description = "Refresh the parts table in README.md"
+run = "uv run python update_readme.py"
+
 [tasks.sync]
 description = "Install Python dependencies into .venv"
 run = "uv sync"
