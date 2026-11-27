@@ -6,6 +6,14 @@ Drive SolidCraft through the `solidcraft` MCP server, or `solidcraft-cli` for ba
 
 Reply in the user's language. A German request gets a German answer.
 
+## Printer
+
+Bambu Lab A1, 0.4 mm nozzle, 256 × 256 × 256 mm build volume. Assume PLA unless the user says otherwise. Every part fits the build volume in its print orientation.
+
+Slicing is done in OrcaSlicer. When the user wants to print, run `python3 slice_part.py <part>`. It applies the A1 profiles and the part's print settings, slices, and opens the project. Report time, weight and changed settings. The user starts the print.
+
+Print settings that differ from the defaults go in `parts/<name>/print.toml`: `copies` and a `[settings]` table of OrcaSlicer process keys with string values. List only what differs from 0.20mm Standard, and comment on values that are not obvious. The print orientation stays in the design property `io.github.cads.print`. Model each part in its print orientation, because the script does not rotate it.
+
 ## Make a part
 
 Do this when the user describes a part or asks to change one. Create the folder and export without asking. Proceed on stated assumptions. Ask only when a missing main dimension makes the body impossible, such as an unknown length.
