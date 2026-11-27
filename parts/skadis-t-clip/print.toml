@@ -1,0 +1,6 @@
+copies = 4  # 2 per bin, 2 spares
+
+[settings]
+wall_loops = "4"
+sparse_infill_density = "100%"  # the stem carries the load
+sparse_infill_pattern = "rectilinear"  # works at 100 %
