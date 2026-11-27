@@ -1,8 +1,8 @@
 # CAD project
 
-Parametric parts are modeled with [build123d](https://github.com/gumyr/build123d). The Python script is the source. The STEP file is the export.
+Parametric parts are modeled in [SolidCraft](https://github.com/tangency-labs/solidcraft). The design `parts/<name>/<name>.sc` is the source. STEP and PNG are exports. Do not commit STL files.
 
-The script is the deliverable. The build123d MCP server is a workbench: use it to build, measure and render geometry, then write the result into `parts/<name>/<name>.py`. The script must run on its own and never depend on a live MCP session.
+Drive SolidCraft through the `solidcraft` MCP server, or `solidcraft-cli` for batch runs and re-exports. Do not use other CAD kernels or generate parts from scripts outside SolidCraft. Command shapes, plane axes and known traps: `skill_reference {"skill":"solidcraft-modeling"}`.
 
 Reply in the user's language. A German request gets a German answer.
 
@@ -10,119 +10,46 @@ Reply in the user's language. A German request gets a German answer.
 
 Do this when the user describes a part or asks to change one. Create the folder and export without asking. Proceed on stated assumptions. Ask only when a missing main dimension makes the body impossible, such as an unknown length.
 
-1. Name the part by what it is: English kebab-case, ASCII, two to four words (`flat-ring`, `servo-bracket`). A purpose the user gave wins. Dimensions stay in the source, so a size change keeps the folder. A second similar part gets its own purpose name.
-2. Write `parts/<name>/<name>.py` from the script contract and the geometry rules below.
-3. Replace any existing export and run from the repository root:
+1. Name the part by what it is: English kebab-case, ASCII, two to four words (`flat-ring`, `servo-bracket`). A purpose the user gave wins. Dimensions stay in parameters, so a size change keeps the folder. A second similar part gets its own purpose name.
+2. For a change, open the existing `.sc` and edit its parameters or features. Do not rebuild it from nothing.
+3. Work the numbers out first: parameters, expected volume and bounding box. Then build following the design rules below.
+4. Check the geometry. A file that saves can still be the wrong part:
+   - one body per part, closed, no feature errors;
+   - bounding box matches the named dimensions;
+   - volume matches the estimate. A volume that did not change means a cut missed or a join did not touch;
+   - `check_parameters` with 2 or 3 changed main parameters gives no errors and a plausible part;
+   - print check: no flat overhang above the bed with a span over 5 mm, large bed contact face;
+   - for a mating or holding part, overlap with a stand-in of the other part is 0.
+5. Save and export all three files into `parts/<name>/`, each under the folder name:
+   - `file.save_as` for `.sc`;
+   - `export` for `.step`;
+   - `screenshot {"view":"iso","source":"model","grid":false,"axes":false,"width":900,"height":650,"path":...}` for `.png`.
+
+   Exports do not follow the design by themselves. Redo all of them after every change.
+6. Refresh the README parts table: `python3 update_readme.py`. CI does the same on push.
+7. Report the paths, named dimensions, checked size and volume, print orientation and every assumption, in the user's language.
+
+Done when design and exports are saved, the checks hold, and the user has those facts.
+
+If the MCP refuses a project path, the server was started without `--allow-path` for this repository. Use the project `opencode.json` entry, or export with the CLI:
 
 ```sh
-rm -f parts/<name>/<name>.step
-uv run python parts/<name>/<name>.py
+solidcraft-cli run --in parts/<name>/<name>.sc --out parts/<name>/<name>.step
+solidcraft-cli snapshot parts/<name>/<name>.sc --out parts/<name>/<name>.png --view iso --no-grid --no-axes --width 900 --height 650
 ```
 
-If the import fails, run `uv sync`, then export again.
-
-   Then refresh the README parts table: `uv run python update_readme.py`. CI does the same on push.
-
-4. A valid export is a new non-empty file that starts with `ISO-10303-21`. On any other result, fix the source and export again.
-5. Check the geometry from the line the script prints. A file that exports can still be the wrong part. Fix the source and export again unless all four hold:
-   - `solids` is 1. Pieces that only touch stay separate; overlap them by 0.01 mm.
-   - `valid` is True.
-   - `size` matches the named dimensions. A wrong size means a centered primitive, a wrong sign, or an unassigned result.
-   - `volume` is near a rough hand estimate. A volume that did not change means a cutter missed the part or an operation was never assigned.
-6. Verify the export in the MCP when the part has more than one boolean, fillet or pattern (a bare box, plate or ring needs only step 5). Use one batched `execute` call, never one call per check, and keep the output compact:
-   - Import the exported STEP with `import_step`, not a copy of the code.
-   - Print `solids`, `valid`, the bounding box, the volume and the face count.
-   - Scan for print problems: planar faces with `normal_at().Z < -0.99` above the bed are overhangs. Their span must stay within the 5 mm bridge limit. The bed contact must be one large face.
-   - For a mating or holding part, intersect it with a stand-in of the other part. The overlap volume must be 0.
-   - Render once with `render_view` from `iso`. Trust the numbers over a clipped section render.
-   - Save that render as the preview: `render_view(objects=..., direction="iso", save_to="parts/<name>/<name>.png")`, then rerun `update_readme.py`. Render again after every change to the part. A bare box, plate or ring gets its preview the same way, even without the checks above.
-   - Skip `workflow_hints`, `health_check` and `version` unless a call fails.
-   Fix the source and export again on any failure.
-7. Report both paths, the named dimensions, the checked size and volume, and every assumption, in the user's language.
-
-Done when that valid export sits beside the source, the check holds, and the user has those facts.
-
-## Script contract
+## Design rules
 
 - Millimeters, unless the user says otherwise.
-- Every dimension is a named constant.
-- Algebra mode, unless builder mode is the clearer history.
-- Import names from `build123d`.
-- Export path comes from `__file__`.
-- `part.label` is the folder name.
-- `export_step` returns true.
-- One fused solid. `Compound` only for an assembly the user asked for.
+- Every main dimension is a named parameter (snake_case, English); derived values are parameter expressions. A comment on the parameter explains a value that is not obvious, such as a spec tolerance. Counts are unitless parameters.
+- Feature fields and sketch points use those parameters. Every sketch ends at dof 0.
+- Features and sketches have unique English names.
+- Set the design property `description` to one line saying what the part is. The README table shows it. State the print orientation in the custom property `io.github.cads.print`, as `document.metadata.set {"key":"io.github.cads.print","value":{"orientation":"..."}}`.
+- Prefer primitives (box, cylinder, hole, fillet, shell, pattern, mirror); sketch when the profile is not a box or circle. Fillet and chamfer late.
+- Edge and face picks are plain points. Check the face count after a fillet or chamfer.
+- The part must be 3D-printable (FDM by default). Pick a print orientation with the largest flat face on the bed. Avoid overhangs steeper than 45 degrees, bridges over 5 mm (a wide window in a vertical wall needs a pointed or 45 degree chamfered head), walls under 1.2 mm and unsupported features. Mating parts get 0.3 mm clearance per side.
+- One fused body. Several bodies only for an assembly the user asked for.
 - Model the features the user named.
-- The part must be 3D-printable (FDM by default). Pick a print orientation with the largest flat face on the bed and name it in a one-line comment under the docstring. Avoid overhangs steeper than 45 degrees, bridges over 5 mm (a wide window in a vertical wall needs a pointed or 45 degree chamfered head), walls under 1.2 mm, and unsupported features. Mating parts get 0.3 mm clearance per side. Say in the report which print orientation you assumed.
-- The script exports and exits.
-- The docstring is one line that says what the part is. The README table shows it.
-- No request text, units or assumption lists in the file. Assumptions go in the report. A short comment is allowed on a value that is not obvious, such as a spec tolerance.
-
-```python
-"""Short description."""
-
-from pathlib import Path
-
-from build123d import Align, Box, export_step
-
-HERE = Path(__file__).resolve().parent
-NAME = HERE.name
-STEP_PATH = HERE / f"{NAME}.step"
-
-LENGTH = 40.0
-WIDTH = 20.0
-THICKNESS = 5.0
-
-
-def make_part():
-    part = Box(
-        LENGTH,
-        WIDTH,
-        THICKNESS,
-        align=(Align.CENTER, Align.CENTER, Align.MIN),
-    )
-    part.label = NAME
-    return part
-
-
-def main() -> None:
-    part = make_part()
-    if not export_step(part, STEP_PATH):
-        raise SystemExit(f"STEP export failed: {STEP_PATH}")
-    size = part.bounding_box().size
-    print(
-        f"wrote {STEP_PATH}\n"
-        f"size {size.X:.1f} x {size.Y:.1f} x {size.Z:.1f}, "
-        f"volume {part.volume:.0f}, solids {len(part.solids())}, valid {part.is_valid}"
-    )
-
-
-if __name__ == "__main__":
-    main()
-```
-
-## Geometry
-
-Look up an uncertain call in the MCP resources `build123d://quickref` and `build123d://selectors`, which are tested against the installed version. Without the MCP, use the [build123d docs](https://build123d.readthedocs.io/en/latest/) or the [cheat sheet](https://build123d.readthedocs.io/en/latest/cheat_sheet.html).
-
-Place a shape with `Pos(x, y, z) * shape` and rotate it with `Rot(x, y, z) * shape`.
-
-Assign the result of an operation: `part = fillet(part.edges(), radius)`. A builder script stays in builder mode, and its solid is the context's `.part`.
-
-Build a profile as a 2D sketch with rounded corners (`RectangleRounded`), then extrude it. Fillet and chamfer last.
-
-Pick one face before working on it, and have the MCP highlight that face or edge before you commit a fillet or a cut. A pick by extremum moves when a taller feature is added, so finish a feature before fusing it, keep a reference to geometry you made, or filter by property (radius, axis). An existing STEP file comes in through `import_step`.
-
-A hole cutter starts 0.5 mm before the face and is 1 mm longer than the stock.
-
-```python
-hole = Pos(12, 0, -0.5) * Cylinder(
-    radius=HOLE_DIAMETER / 2,
-    height=THICKNESS + 1,
-    align=(Align.CENTER, Align.CENTER, Align.MIN),
-)
-part = plate - hole
-```
 
 A named thread is a hole. An unqualified "M3 hole" uses the clearance diameter. Say which column you used.
 
@@ -135,4 +62,4 @@ A named thread is a hole. An unqualified "M3 hole" uses the clearance diameter. 
 | M6 | 6.6 | 5.0 |
 | M8 | 9.0 | 6.8 |
 
-A requested STL is a second file from `export_stl`, beside the STEP export. A requested 2D profile uses `export_dxf` or `export_svg` the same way.
+A requested STL is exported beside the STEP and kept out of git. A requested 2D profile is exported with `sketch.export_dxf` or `sketch.export_svg` beside the design.

@@ -1,24 +1,45 @@
-name: Update README
+name: Parts
 
 on:
   push:
     branches: [main]
-    paths:
+    paths: &paths
       - "parts/**"
       - "update_readme.py"
+      - ".github/workflows/readme.yml"
+  pull_request:
+    paths: *paths
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  readme:
+  check:
+    name: Check parts
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
         with:
-          python-version: "3.13"
-      - run: python update_readme.py
+          persist-credentials: false
+      - run: python3 update_readme.py
+
+  readme:
+    name: Update README
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - run: python3 update_readme.py
       - name: Commit README
         run: |
           if git diff --quiet README.md; then
@@ -27,6 +48,6 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add README.md
-          git commit -m "Update parts table in README"
+          git commit -m "Update parts table in README" README.md
+          git pull --rebase
           git push

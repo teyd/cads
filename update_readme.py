@@ -1,13 +1,15 @@
 """Rewrite the parts table in README.md from the folders in parts/.
 
-Each row shows the preview PNG when one exists, and links the part folder, the STEP
-file, and an Online 3D Viewer link that loads the STEP file from raw.githubusercontent.com. Only the text between the
-START and END markers is replaced.
+Fails when a part lacks its design, STEP, preview or description. Each row shows the preview and links the part folder, the design, the
+STEP file, and the SolidCraft web viewer, which loads the .sc design from
+raw.githubusercontent.com. Only the text between the START and END markers is replaced.
 """
 
-import ast
+import json
 import os
+import zipfile
 from pathlib import Path
+from urllib.parse import quote
 
 ROOT = Path(__file__).resolve().parent
 README = ROOT / "README.md"
@@ -16,16 +18,17 @@ PARTS = ROOT / "parts"
 REPO = os.environ.get("GITHUB_REPOSITORY", "teyd/cads")
 BRANCH = "main"
 RAW_BASE = f"https://raw.githubusercontent.com/{REPO}/{BRANCH}"
-VIEWER = "https://3dviewer.net/#model="
+VIEWER = "https://app.solidcraft.io/?embed&open="
 
-# The viewer reads the raw URL from the hash as is. Percent-encoding it breaks loading.
 START = "<!-- parts:start -->"
 END = "<!-- parts:end -->"
 
 
-def describe(script: Path) -> str:
-    doc = ast.get_docstring(ast.parse(script.read_text(encoding="utf-8"))) or ""
-    return doc.splitlines()[0].rstrip(".") if doc else ""
+def describe(design: Path) -> str:
+    # A .sc design is a zip; document.json holds the design properties.
+    with zipfile.ZipFile(design) as container:
+        metadata = json.loads(container.read("document.json")).get("metadata", {})
+    return metadata.get("description", "").strip().rstrip(".").replace("|", "\\|")
 
 
 def build_table() -> str:
@@ -33,20 +36,27 @@ def build_table() -> str:
         "| Preview | Part | Description | Files | 3D view |",
         "| --- | --- | --- | --- | --- |",
     ]
+    problems = []
     for folder in sorted(p for p in PARTS.iterdir() if p.is_dir()):
         name = folder.name
-        script = folder / f"{name}.py"
+        design = folder / f"{name}.sc"
         step = folder / f"{name}.step"
-        if not (script.exists() and step.exists()):
-            continue
-        raw = f"{RAW_BASE}/parts/{name}/{name}.step"
         png = folder / f"{name}.png"
-        preview = f'<img src="parts/{name}/{name}.png" width="160">' if png.exists() else ""
+        missing = [p.name for p in (design, step, png) if not p.exists()]
+        if design.exists() and not describe(design):
+            missing.append("description property")
+        if missing:
+            problems.append(f"{name}: missing {', '.join(missing)}")
+            continue
+        raw = quote(f"{RAW_BASE}/parts/{name}/{name}.sc", safe="")
+        preview = f'<img src="parts/{name}/{name}.png" width="160">'
         rows.append(
-            f"| {preview} | [{name}](parts/{name}/) | {describe(script)} "
-            f"| [py](parts/{name}/{name}.py), [step](parts/{name}/{name}.step) "
+            f"| {preview} | [{name}](parts/{name}/) | {describe(design)} "
+            f"| [sc](parts/{name}/{name}.sc), [step](parts/{name}/{name}.step) "
             f"| [View]({VIEWER}{raw}) |"
         )
+    if problems:
+        raise SystemExit("Incomplete parts:\n" + "\n".join(problems))
     return "\n".join(rows)
 
 

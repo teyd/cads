@@ -2,15 +2,13 @@
   "$schema": "https://opencode.ai/config.json",
   "mcp": {
     "servers": {
-      "build123d": {
+      "solidcraft": {
         "type": "local",
         "command": [
-          "uv",
-          "tool",
-          "run",
-          "--python",
-          "3.12",
-          "build123d-mcp@0.3.91"
+          "solidcraft-cli",
+          "mcp",
+          "--allow-path",
+          "."
         ]
       }
     }
