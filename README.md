@@ -1,41 +1,45 @@
 # cads
 
-Parametric CAD parts as [build123d](https://github.com/gumyr/build123d) scripts. Describe a part to your coding agent, and it writes the script and exports the STEP file.
+Parametric CAD parts as [SolidCraft](https://github.com/tangency-labs/solidcraft) designs. Describe a part to your coding agent, and it builds the design and exports STEP.
 
 ## How to
 
-Paste this to your AI coding agent:
-
-```text
-Set up https://github.com/teyd/cads for me. Install mise (https://mise.jdx.dev/, a tool version manager) if it is missing and make sure it is on my PATH, clone the repo, run `mise install` inside it, and follow AGENTS.md from then on. When setup is done, ask me which part I want to build.
-```
-
-Or do it by hand:
+Install [SolidCraft](https://solidcraft.io/download/) and make sure `solidcraft-cli` is on your PATH. On macOS, link it from the app bundle:
 
 ```sh
-brew install mise # add mise to path
+ln -s /Applications/SolidCraft.app/Contents/MacOS/solidcraft-cli /opt/homebrew/bin/solidcraft-cli
+```
+
+Then clone the repo, start your coding agent in it and describe the part you want:
+
+```sh
 git clone https://github.com/teyd/cads.git
 cd cads
-mise install
 opencode # v2
 ```
 
-Then describe the part you want. The agent follows `AGENTS.md`.
+The agent follows `AGENTS.md`. When it is done, open `parts/<name>/<name>.step` in a slicer such as [OrcaSlicer](https://github.com/SoftFever/OrcaSlicer) and print it. Open `parts/<name>/<name>.sc` in SolidCraft to change parameters.
 
-When it is done, open `parts/<name>/<name>.step` in a slicer such as [OrcaSlicer](https://github.com/SoftFever/OrcaSlicer) and print it.
+For readable git diffs of designs, run once in your clone:
+
+```sh
+git config diff.solidcraft.textconv "solidcraft-cli textconv"
+```
 
 ## Parts
 
 <!-- parts:start -->
 | Preview | Part | Description | Files | 3D view |
 | --- | --- | --- | --- | --- |
-| <img src="parts/blind-hole-cube/blind-hole-cube.png" width="160"> | [blind-hole-cube](parts/blind-hole-cube/) | Cube with a centered round blind hole reaching half way down | [py](parts/blind-hole-cube/blind-hole-cube.py), [step](parts/blind-hole-cube/blind-hole-cube.step) | [View](https://3dviewer.net/#model=https://raw.githubusercontent.com/teyd/cads/main/parts/blind-hole-cube/blind-hole-cube.step) |
-| <img src="parts/charger-bed-hook/charger-bed-hook.png" width="160"> | [charger-bed-hook](parts/charger-bed-hook/) | Bed-frame hook with an open cage for a Ugreen 90747 desktop charger | [py](parts/charger-bed-hook/charger-bed-hook.py), [step](parts/charger-bed-hook/charger-bed-hook.step) | [View](https://3dviewer.net/#model=https://raw.githubusercontent.com/teyd/cads/main/parts/charger-bed-hook/charger-bed-hook.step) |
-| <img src="parts/desk-caddy-foot/desk-caddy-foot.png" width="160"> | [desk-caddy-foot](parts/desk-caddy-foot/) | Press-in TPU anti-slip foot for the desk device caddy | [py](parts/desk-caddy-foot/desk-caddy-foot.py), [step](parts/desk-caddy-foot/desk-caddy-foot.step) | [View](https://3dviewer.net/#model=https://raw.githubusercontent.com/teyd/cads/main/parts/desk-caddy-foot/desk-caddy-foot.step) |
-| <img src="parts/desk-device-caddy/desk-device-caddy.png" width="160"> | [desk-device-caddy](parts/desk-device-caddy/) | Loose desktop tray for a 200 W GaN charger, a USB switch and a headphone DAC | [py](parts/desk-device-caddy/desk-device-caddy.py), [step](parts/desk-device-caddy/desk-device-caddy.step) | [View](https://3dviewer.net/#model=https://raw.githubusercontent.com/teyd/cads/main/parts/desk-device-caddy/desk-device-caddy.step) |
-| <img src="parts/flat-ring/flat-ring.png" width="160"> | [flat-ring](parts/flat-ring/) | Flat annular ring | [py](parts/flat-ring/flat-ring.py), [step](parts/flat-ring/flat-ring.step) | [View](https://3dviewer.net/#model=https://raw.githubusercontent.com/teyd/cads/main/parts/flat-ring/flat-ring.step) |
-| <img src="parts/nvme-stack-case/nvme-stack-case.png" width="160"> | [nvme-stack-case](parts/nvme-stack-case/) | Stackable case for ten M.2 2280 NVMe drives | [py](parts/nvme-stack-case/nvme-stack-case.py), [step](parts/nvme-stack-case/nvme-stack-case.step) | [View](https://3dviewer.net/#model=https://raw.githubusercontent.com/teyd/cads/main/parts/nvme-stack-case/nvme-stack-case.step) |
-| <img src="parts/sodimm-stack-case/sodimm-stack-case.png" width="160"> | [sodimm-stack-case](parts/sodimm-stack-case/) | Stackable case for ten SO-DIMM RAM modules | [py](parts/sodimm-stack-case/sodimm-stack-case.py), [step](parts/sodimm-stack-case/sodimm-stack-case.step) | [View](https://3dviewer.net/#model=https://raw.githubusercontent.com/teyd/cads/main/parts/sodimm-stack-case/sodimm-stack-case.step) |
+| <img src="parts/blind-hole-cube/blind-hole-cube.png" width="160"> | [blind-hole-cube](parts/blind-hole-cube/) | Cube with a centered round blind hole reaching half way down | [sc](parts/blind-hole-cube/blind-hole-cube.sc), [step](parts/blind-hole-cube/blind-hole-cube.step) | [View](https://app.solidcraft.io/?embed&open=https%3A%2F%2Fraw.githubusercontent.com%2Fteyd%2Fcads%2Fmain%2Fparts%2Fblind-hole-cube%2Fblind-hole-cube.sc) |
+| <img src="parts/charger-bed-hook/charger-bed-hook.png" width="160"> | [charger-bed-hook](parts/charger-bed-hook/) | Bed-frame hook with an open cage for a Ugreen 90747 desktop charger | [sc](parts/charger-bed-hook/charger-bed-hook.sc), [step](parts/charger-bed-hook/charger-bed-hook.step) | [View](https://app.solidcraft.io/?embed&open=https%3A%2F%2Fraw.githubusercontent.com%2Fteyd%2Fcads%2Fmain%2Fparts%2Fcharger-bed-hook%2Fcharger-bed-hook.sc) |
+| <img src="parts/desk-caddy-foot/desk-caddy-foot.png" width="160"> | [desk-caddy-foot](parts/desk-caddy-foot/) | Press-in TPU anti-slip foot for the desk device caddy | [sc](parts/desk-caddy-foot/desk-caddy-foot.sc), [step](parts/desk-caddy-foot/desk-caddy-foot.step) | [View](https://app.solidcraft.io/?embed&open=https%3A%2F%2Fraw.githubusercontent.com%2Fteyd%2Fcads%2Fmain%2Fparts%2Fdesk-caddy-foot%2Fdesk-caddy-foot.sc) |
+| <img src="parts/desk-device-caddy/desk-device-caddy.png" width="160"> | [desk-device-caddy](parts/desk-device-caddy/) | Loose desktop tray for a 200 W GaN charger, a USB switch and a headphone DAC | [sc](parts/desk-device-caddy/desk-device-caddy.sc), [step](parts/desk-device-caddy/desk-device-caddy.step) | [View](https://app.solidcraft.io/?embed&open=https%3A%2F%2Fraw.githubusercontent.com%2Fteyd%2Fcads%2Fmain%2Fparts%2Fdesk-device-caddy%2Fdesk-device-caddy.sc) |
+| <img src="parts/flat-ring/flat-ring.png" width="160"> | [flat-ring](parts/flat-ring/) | Flat annular ring | [sc](parts/flat-ring/flat-ring.sc), [step](parts/flat-ring/flat-ring.step) | [View](https://app.solidcraft.io/?embed&open=https%3A%2F%2Fraw.githubusercontent.com%2Fteyd%2Fcads%2Fmain%2Fparts%2Fflat-ring%2Fflat-ring.sc) |
+| <img src="parts/nvme-stack-case/nvme-stack-case.png" width="160"> | [nvme-stack-case](parts/nvme-stack-case/) | Stackable case for ten M.2 2280 NVMe drives | [sc](parts/nvme-stack-case/nvme-stack-case.sc), [step](parts/nvme-stack-case/nvme-stack-case.step) | [View](https://app.solidcraft.io/?embed&open=https%3A%2F%2Fraw.githubusercontent.com%2Fteyd%2Fcads%2Fmain%2Fparts%2Fnvme-stack-case%2Fnvme-stack-case.sc) |
+| <img src="parts/shelf-bin-rail/shelf-bin-rail.png" width="160"> | [shelf-bin-rail](parts/shelf-bin-rail/) | Two-piece flat shelf side rail with short hanging prongs for 100 mm storage bins | [sc](parts/shelf-bin-rail/shelf-bin-rail.sc), [step](parts/shelf-bin-rail/shelf-bin-rail.step) | [View](https://app.solidcraft.io/?embed&open=https%3A%2F%2Fraw.githubusercontent.com%2Fteyd%2Fcads%2Fmain%2Fparts%2Fshelf-bin-rail%2Fshelf-bin-rail.sc) |
+| <img src="parts/sodimm-stack-case/sodimm-stack-case.png" width="160"> | [sodimm-stack-case](parts/sodimm-stack-case/) | Stackable case for ten SO-DIMM RAM modules | [sc](parts/sodimm-stack-case/sodimm-stack-case.sc), [step](parts/sodimm-stack-case/sodimm-stack-case.step) | [View](https://app.solidcraft.io/?embed&open=https%3A%2F%2Fraw.githubusercontent.com%2Fteyd%2Fcads%2Fmain%2Fparts%2Fsodimm-stack-case%2Fsodimm-stack-case.sc) |
+| <img src="parts/swiss-edge-clamp-wedge/swiss-edge-clamp-wedge.png" width="160"> | [swiss-edge-clamp-wedge](parts/swiss-edge-clamp-wedge/) | Clamp jaw that squares off a Swiss-edge tabletop for monitor arms | [sc](parts/swiss-edge-clamp-wedge/swiss-edge-clamp-wedge.sc), [step](parts/swiss-edge-clamp-wedge/swiss-edge-clamp-wedge.step) | [View](https://app.solidcraft.io/?embed&open=https%3A%2F%2Fraw.githubusercontent.com%2Fteyd%2Fcads%2Fmain%2Fparts%2Fswiss-edge-clamp-wedge%2Fswiss-edge-clamp-wedge.sc) |
 <!-- parts:end -->
 
-Each part is `parts/<name>/<name>.py` (the source) and `parts/<name>/<name>.step` (the export). Units are millimeters. The table is generated by `update_readme.py`.
+Each part is `parts/<name>/<name>.sc` (the source) with `.step` and `.png` exports. Units are millimeters. The table is generated by `python3 update_readme.py`.
